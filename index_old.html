@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduPulse | Engineering Excellence</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+
+        .sidebar {
+            background: #020617;
+            border-right: 1px solid #1e293b;
+        }
+
+        .course-card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .course-card:hover {
+            border-color: #3b82f6;
+            transform: translateY(-5px);
+        }
+
+        .gradient-text {
+            background: linear-gradient(90deg, #3b82f6, #9333ea);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .playlist-item {
+            border-left: 3px solid transparent;
+        }
+
+        .playlist-item:hover {
+            background: #334155;
+            border-left-color: #3b82f6;
+        }
+
+        .modal-blur {
+            backdrop-filter: blur(12px);
+            background: rgba(2, 6, 23, 0.85);
+        }
+
+        .certificate-design {
+            background: radial-gradient(circle at top left, #1e293b, #020617);
+            border: 2px solid #3b82f6;
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.2);
+        }
+
+        .correct-ans {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid #10b981;
+            color: #10b981;
+        }
+
+        .wrong-ans {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid #ef4444;
+            color: #ef4444;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useMemo, useEffect } = React;
+
+        // --- REAL-WORLD DATA REPOSITORY ---
+        const MASTER_DATA = {
+            "Java Full Stack": {
+                img: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800",
+                playlist: ["JVM Internals", "Spring Boot Security", "Microservices Auth", "Hibernate Tuning", "Kafka Streams", "Dockerizing Java"],
+                questions: [
+                    { q: "What is the purpose of the 'volatile' keyword?", a: ["Thread safety for variables", "Memory optimization", "Garbage collection", "Class inheritance"], c: "Thread safety for variables" },
+                    { q: "Which Spring annotation handles HTTP POST?", a: ["@PostMapping", "@GetMapping", "@HandlePost", "@RequestMap"], c: "@PostMapping" },
+                    { q: "What is a Functional Interface?", a: ["Interface with one method", "Interface with no methods", "A class with methods", "A final interface"], c: "Interface with one method" },
+                    { q: "Which memory stores objects in Java?", a: ["Heap", "Stack", "Metaspace", "Register"], c: "Heap" },
+                    { q: "Java Garbage Collection works on which principle?", a: ["Mark and Sweep", "LIFO", "FIFO", "Binary Search"], c: "Mark and Sweep" },
+                    { q: "What is a 'deadlock' in multithreading?", a: ["Cyclic dependency", "Thread sleep", "Fast execution", "Memory leak"], c: "Cyclic dependency" },
+                    { q: "Which collection allows null keys?", a: ["HashMap", "Hashtable", "TreeMap", "None"], c: "HashMap" },
+                    { q: "Purpose of 'Optional' class?", a: ["Handle NullPointerException", "Speed up code", "Memory management", "File I/O"], c: "Handle NullPointerException" },
+                    { q: "Is String immutable in Java?", a: ["Yes", "No", "Depends", "Only in Java 8"], c: "Yes" },
+                    { q: "Keyword to prevent inheritance?", a: ["final", "static", "private", "protected"], c: "final" },
+                    { q: "Default value of local variable?", a: ["No default", "null", "0", "undefined"], c: "No default" },
+                    { q: "Exception thrown when dividing by zero?", a: ["ArithmeticException", "NullPointer", "RunTime", "IOException"], c: "ArithmeticException" },
+                    { q: "Method used to start a thread?", a: ["start()", "run()", "begin()", "init()"], c: "start()" },
+                    { q: "Can we override static methods?", a: ["No", "Yes", "Only in interfaces", "Only in same package"], c: "No" },
+                    { q: "Which package contains 'List'?", a: ["java.util", "java.lang", "java.io", "java.sql"], c: "java.util" },
+                    { q: "What is Polymorphism?", a: ["One name, many forms", "Code hiding", "Reusing code", "Data bundling"], c: "One name, many forms" },
+                    { q: "Does 'finally' block always execute?", a: ["Yes, usually", "No", "Only on error", "Only on success"], c: "Yes, usually" },
+                    { q: "Constructor return type?", a: ["None", "void", "int", "Object"], c: "None" },
+                    { q: "What is JIT?", a: ["Just-in-Time Compiler", "Job Interface Tool", "Java Int Tool", "None"], c: "Just-in-Time Compiler" },
+                    { q: "Difference between '==' and '.equals()'?", a: ["Reference vs Content", "Both same", "equals is faster", "None"], c: "Reference vs Content" }
+                ]
+            },
+            "Python AI/ML": {
+                img: "https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=800",
+                playlist: ["NumPy Essentials", "Linear Regression", "Neural Networks", "Pandas DataFrames", "TensorFlow Basics", "Scikit-Learn Intro"],
+                questions: [
+                    { q: "Library used for DataFrames?", a: ["Pandas", "NumPy", "Keras", "Flask"], c: "Pandas" },
+                    { q: "Keyword for lambda functions?", a: ["lambda", "def", "func", "anon"], c: "lambda" },
+                    { q: "Method to add to end of list?", a: ["append()", "add()", "insert()", "push()"], c: "append()" },
+                    { q: "Is Python compiled or interpreted?", a: ["Interpreted", "Compiled", "Both", "Neither"], c: "Interpreted" },
+                    { q: "What is a tuple?", a: ["Immutable list", "Mutable list", "A function", "A class"], c: "Immutable list" },
+                    { q: "Which is for deep learning?", a: ["PyTorch", "Django", "Pygame", "Requests"], c: "PyTorch" },
+                    { q: "Symbol for comments?", a: ["#", "//", "/*", "--"], c: "#" },
+                    { q: "List vs Dictionary access?", a: ["Index vs Key", "Key vs Index", "Both same", "None"], c: "Index vs Key" },
+                    { q: "How to handle errors?", a: ["try-except", "try-catch", "if-else", "error-do"], c: "try-except" },
+                    { q: "Correct file extension?", a: [".py", ".pt", ".python", ".pyt"], c: ".py" },
+                    { q: "What is PEP 8?", a: ["Style guide", "Python version", "Library", "Compiler"], c: "Style guide" },
+                    { q: "Keyword to import modules?", a: ["import", "using", "require", "get"], c: "import" },
+                    { q: "List comprehension uses?", a: ["Brackets []", "Parens ()", "Braces {}", "Quotes"], c: "Brackets []" },
+                    { q: "What is '__init__'?", a: ["Constructor", "Initializer", "Library", "Variable"], c: "Constructor" },
+                    { q: "Global variables are?", a: ["Outside functions", "Inside functions", "Hidden", "None"], c: "Outside functions" },
+                    { q: "Slicing syntax?", a: ["[start:stop]", "(start,stop)", "{start:stop}", "None"], c: "[start:stop]" },
+                    { q: "Dictionary key property?", a: ["Unique", "Mutable", "Hidden", "None"], c: "Unique" },
+                    { q: "What is 'None'?", a: ["Null equivalent", "Empty string", "Zero", "Error"], c: "Null equivalent" },
+                    { q: "Range(5) generates?", a: ["0 to 4", "1 to 5", "0 to 5", "1 to 4"], c: "0 to 4" },
+                    { q: "What is a 'set'?", a: ["Unordered unique items", "Ordered list", "Sorted list", "None"], c: "Unordered unique items" }
+                ]
+            }
+        };
+
+        // Create 300 Courses by rotating the high-quality metadata
+        const COURSE_DB = Array.from({ length: 300 }, (_, i) => {
+            const keys = Object.keys(MASTER_DATA);
+            const data = MASTER_DATA[keys[i % keys.length]];
+            return {
+                id: i + 1,
+                title: `${keys[i % keys.length]} - Advanced Module ${Math.floor(i / keys.length) + 1}`,
+                category: keys[i % keys.length].split(' ')[0],
+                img: data.img,
+                playlist: data.playlist,
+                questions: data.questions
+            };
+        });
+
+        // --- COMPONENTS ---
+        const Dashboard = ({ user, onLogout }) => {
+            const [view, setView] = useState('home');
+            const [activeCourse, setActiveCourse] = useState(null);
+            const [myPlaylist, setMyPlaylist] = useState([]);
+            const [certs, setCerts] = useState([]);
+            const [answers, setAnswers] = useState({});
+            const [submitted, setSubmitted] = useState(false);
+            const [search, setSearch] = useState('');
+
+            const UID = useMemo(() => `SID-${Math.floor(100000 + Math.random() * 900000)}`, []);
+
+            const submitExam = () => {
+                let score = 0;
+                activeCourse.questions.forEach((q, i) => { if (answers[i] === q.c) score++; });
+                setSubmitted(true);
+                if (score === 20) {
+                    if (!certs.find(c => c.id === activeCourse.id)) {
+                        setCerts([...certs, { ...activeCourse, date: new Date().toLocaleDateString() }]);
+                    }
+                }
+            };
+
+            return (
+                <div className="flex min-h-screen">
+                    {/* SIDEBAR */}
+                    <aside className="w-72 sidebar flex flex-col p-8 fixed h-full z-20">
+                        <div className="flex items-center gap-3 mb-12">
+                            <div className="bg-blue-600 p-2 rounded-lg text-white"><i className="fas fa-terminal"></i></div>
+                            <span className="text-2xl font-black italic tracking-tighter">EduPulse</span>
+                        </div>
+                        <nav className="space-y-3 flex-1">
+                            <button onClick={() => setView('home')} className={`w-full text-left p-4 rounded-xl font-bold flex items-center gap-4 transition ${view === 'home' ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/40' : 'text-slate-400 hover:text-white'}`}><i className="fas fa-compass"></i> Explore</button>
+                            <button onClick={() => setView('profile')} className={`w-full text-left p-4 rounded-xl font-bold flex items-center gap-4 transition ${view === 'profile' ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/40' : 'text-slate-400 hover:text-white'}`}><i className="fas fa-id-card"></i> My Learning</button>
+                        </nav>
+                        <button onClick={onLogout} className="text-red-500 font-bold flex items-center gap-3 p-4 hover:bg-red-500/5 rounded-xl"><i className="fas fa-sign-out-alt"></i> Logout</button>
+                    </aside>
+
+                    {/* CONTENT */}
+                    <main className="flex-1 ml-72 p-12">
+                        {view === 'home' ? (
+                            <>
+                                <header className="flex justify-between items-center mb-16">
+                                    <div><h1 className="text-4xl font-black italic mb-2 tracking-tighter">Library Catalog</h1><p className="text-slate-500 font-medium">Professional Engineering Certifications (300+)</p></div>
+                                    <div className="relative w-96">
+                                        <i className="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 opacity-30"></i>
+                                        <input type="text" placeholder="Search technology..." className="w-full bg-slate-900 border border-slate-800 p-5 pl-14 rounded-2xl outline-none focus:ring-2 focus:ring-blue-600 transition" onChange={e => setSearch(e.target.value)} />
+                                    </div>
+                                </header>
+                                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+                                    {COURSE_DB.filter(c => c.title.toLowerCase().includes(search.toLowerCase())).map(c => (
+                                        <div key={c.id} className="course-card rounded-[2rem] overflow-hidden">
+                                            <div className="h-48 relative overflow-hidden">
+                                                <img src={c.img} className="w-full h-full object-cover" />
+                                                <span className="absolute top-4 left-4 bg-blue-600 text-[10px] font-black px-3 py-1 rounded-full uppercase">{c.category}</span>
+                                            </div>
+                                            <div className="p-8">
+                                                <h3 className="text-xl font-black mb-6 leading-tight h-14 overflow-hidden">{c.title}</h3>
+                                                <div className="flex gap-3">
+                                                    <button onClick={() => { setActiveCourse(c); setSubmitted(false); setAnswers({}); }} className="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-2xl text-xs transition uppercase tracking-widest">Start Exam</button>
+                                                    <button onClick={() => setMyPlaylist([...myPlaylist, c])} className="w-14 border border-slate-700 rounded-2xl hover:bg-slate-800 transition"><i className="fas fa-plus"></i></button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </>
+                        ) : (
+                            <div className="max-w-6xl mx-auto">
+                                <div className="bg-slate-900 p-10 rounded-[3rem] border border-slate-800 flex justify-between items-center mb-16">
+                                    <div className="flex items-center gap-8">
+                                        <div className="w-24 h-24 bg-blue-600 rounded-full flex items-center justify-center text-4xl font-black">{user[0].toUpperCase()}</div>
+                                        <div><h2 className="text-3xl font-black italic">{user}</h2><p className="text-blue-500 font-mono text-sm">{UID}</p></div>
+                                    </div>
+                                    <div className="text-center bg-slate-800 p-6 rounded-3xl"><p className="text-4xl font-black">{certs.length}</p><p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Achievements</p></div>
+                                </div>
+
+                                <h3 className="text-2xl font-black italic mb-8"><i className="fas fa-play text-blue-500 mr-4"></i> Continue Learning</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
+                                    {myPlaylist.map(c => (
+                                        <div key={c.id} className="bg-slate-900 p-6 rounded-3xl border border-slate-800 flex items-center gap-6">
+                                            <img src={c.img} className="w-20 h-20 rounded-2xl object-cover" />
+                                            <div className="flex-1"><h4 className="font-bold mb-1">{c.title}</h4><p className="text-xs text-slate-500 font-bold uppercase">{c.category}</p></div>
+                                            <button onClick={() => setActiveCourse(c)} className="bg-blue-600/10 text-blue-500 p-3 rounded-xl hover:bg-blue-600 hover:text-white transition"><i className="fas fa-arrow-right"></i></button>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <h3 className="text-2xl font-black italic mb-8"><i className="fas fa-award text-blue-500 mr-4"></i> Verified Certificates</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    {certs.map(c => (
+                                        <div key={c.id} className="certificate-design p-12 rounded-[3.5rem] relative overflow-hidden">
+                                            <div className="absolute top-8 right-8 text-blue-500/10 text-8xl font-black"><i className="fas fa-certificate"></i></div>
+                                            <p className="text-[10px] font-black text-blue-500 tracking-[0.4em] mb-4 uppercase">Academic Achievement</p>
+                                            <h4 className="text-3xl font-black italic text-white mb-12">{c.title}</h4>
+                                            <div className="flex justify-between items-end border-t border-slate-700 pt-8 mt-4">
+                                                <div><p className="text-[8px] text-slate-500">ISSUED TO</p><p className="text-sm font-black">{user}</p></div>
+                                                <button onClick={() => window.open(`https://linkedin.com`, '_blank')} className="bg-blue-600 text-white px-6 py-3 rounded-xl font-black text-xs">Share LinkedIn</button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* MODAL VIEW */}
+                        {activeCourse && (
+                            <div className="fixed inset-0 z-50 flex justify-end modal-blur">
+                                <div className="w-full max-w-6xl bg-slate-950 h-full overflow-y-auto p-12 border-l border-slate-800 shadow-2xl animate-in slide-in-from-right duration-500">
+                                    <div className="flex justify-between items-center mb-12">
+                                        <h2 className="text-3xl font-black italic gradient-text">{activeCourse.title}</h2>
+                                        <button onClick={() => setActiveCourse(null)} className="w-14 h-14 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-2xl hover:bg-slate-800 transition"><i className="fas fa-times"></i></button>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+                                        <div className="lg:col-span-2">
+                                            <div className="aspect-video bg-black rounded-[2.5rem] overflow-hidden mb-12 shadow-2xl">
+                                                <iframe width="100%" height="100%" src="https://www.youtube.com/embed/mHlIID6M9vI" frameBorder="0" allowFullScreen></iframe>
+                                            </div>
+
+                                            <h3 className="text-2xl font-black mb-8 border-b border-slate-800 pb-4 italic">20-Question Certification Exam</h3>
+                                            <div className="space-y-10">
+                                                {activeCourse.questions.map((q, idx) => (
+                                                    <div key={idx} className="space-y-5">
+                                                        <p className="font-bold text-lg text-slate-300">{idx + 1}. {q.q}</p>
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                            {q.a.map(opt => {
+                                                                let style = "bg-slate-900 border-slate-800 hover:border-blue-500";
+                                                                if (submitted) {
+                                                                    if (opt === q.c) style = "correct-ans";
+                                                                    else if (answers[idx] === opt) style = "wrong-ans";
+                                                                } else if (answers[idx] === opt) {
+                                                                    style = "bg-blue-600 border-blue-600 text-white";
+                                                                }
+                                                                return (
+                                                                    <button key={opt} disabled={submitted} onClick={() => setAnswers({ ...answers, [idx]: opt })} className={`text-left p-5 rounded-2xl border transition-all text-sm font-medium ${style}`}>
+                                                                        {opt}
+                                                                    </button>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+
+                                            <div className="mt-16 bg-slate-900 p-12 rounded-[3.5rem] text-center border border-slate-800 shadow-2xl">
+                                                {!submitted ? (
+                                                    <button onClick={submitExam} className="bg-blue-600 hover:bg-blue-500 text-white px-16 py-6 rounded-[2rem] font-black text-xl shadow-xl shadow-blue-900/40">Submit Final Assessment</button>
+                                                ) : (
+                                                    <div>
+                                                        <h4 className="text-4xl font-black mb-6">Result: {Object.keys(answers).filter(i => answers[i] === activeCourse.questions[i].c).length} / 20</h4>
+                                                        <p className="text-slate-400 mb-8">Score 20/20 to earn your professional certification.</p>
+                                                        <button onClick={() => setActiveCourse(null)} className="bg-slate-800 text-white px-10 py-4 rounded-2xl font-black">Close Session</button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <aside className="w-full">
+                                            <div className="bg-slate-900 rounded-[2.5rem] p-8 border border-slate-800">
+                                                <img src={activeCourse.img} className="w-full rounded-2xl mb-8 object-cover h-40" />
+                                                <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-6">Course Path</h4>
+                                                <div className="space-y-3">
+                                                    {activeCourse.playlist.map((item, i) => (
+                                                        <div key={i} className="playlist-item p-4 text-sm font-bold text-slate-400 rounded-xl cursor-pointer flex items-center gap-4 transition">
+                                                            <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-[10px]">{i + 1}</div> {item}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </aside>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </main>
+                </div>
+            );
+        };
+
+        const App = () => {
+            const [login, setLogin] = useState(false);
+            const [email, setEmail] = useState('');
+            return login ? <Dashboard user={email} onLogout={() => setLogin(false)} /> : (
+                <div className="min-h-screen flex items-center justify-center bg-slate-950 p-6">
+                    <div className="bg-slate-900 border border-slate-800 p-12 rounded-[3rem] w-full max-w-md text-center shadow-2xl">
+                        <div className="w-20 h-20 bg-blue-600 rounded-[2rem] flex items-center justify-center mx-auto mb-8 shadow-xl shadow-blue-900/40"><i className="fas fa-lock text-3xl"></i></div>
+                        <h1 className="text-3xl font-black italic mb-2">EduPulse Portal</h1>
+                        <p className="text-slate-500 text-sm mb-10 font-bold uppercase tracking-widest">Secure Student Access</p>
+                        <input type="email" placeholder="Email" className="w-full bg-slate-800 p-5 rounded-2xl mb-4 border-none outline-none ring-1 ring-slate-700 focus:ring-2 focus:ring-blue-600 transition" onChange={e => setEmail(e.target.value)} />
+                        <input type="password" placeholder="Password" className="w-full bg-slate-800 p-5 rounded-2xl mb-8 border-none outline-none ring-1 ring-slate-700 focus:ring-2 focus:ring-blue-600 transition" />
+                        <button onClick={() => setLogin(true)} className="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-5 rounded-2xl transition uppercase tracking-widest shadow-lg">Login to Start</button>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+
+</html>
